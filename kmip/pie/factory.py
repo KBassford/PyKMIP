@@ -85,16 +85,21 @@ class ObjectFactory:
             raise TypeError("core certificate type not supported")
 
     def _build_pie_key(self, key, cls):
+        """activated on retrival of a key from the database (get)"""
         algorithm = key.key_block.cryptographic_algorithm.value
         length = key.key_block.cryptographic_length.value
         value = key.key_block.key_value.key_material.value
-        masks = key.key_block.key_masks
+        masks = key.key_block.cryptographic_usage_masks
         format_type = key.key_block.key_format_type.value
         key_wrapping_data = key.key_block.key_wrapping_data
-        print("key:", repr(key))
-        print("key.key_block:", repr(key.key_block), str(key.key_block))
+        print("Illistration using the key's value")
+        print("key.key_block.cryptographic_algorithm", repr(key.key_block.cryptographic_algorithm))
+        print("key.key_block.cryptographic_length", repr(key.key_block.cryptographic_length))
         print("key.key_block.key_value:", repr(key.key_block.key_value))
-        print("key.key_block.key_value.key_material.value:", key.key_block.key_value.key_material.value)
+        print("key.key_block.key_value.key_material:", repr(key.key_block.key_value.key_material))
+        print("key.key_block.key_value.key_material.value:", repr(key.key_block.key_value.key_material.value))
+        print("Trying to find our value.")
+        print("key.key_block.cryptographic_usage_masks", key.key_block.cryptographic_usage_masks)
         print("_build_pie_key(1) -- type:", type(masks), "masks:", repr(masks))
 
         if cls is pobjects.SymmetricKey:
@@ -107,6 +112,7 @@ class ObjectFactory:
                     key_wrapping_data
                 )
             )
+            # cls = Fill in empty SymmetricKey.
             print("cls:", repr(cls), str(cls))
             print("_build_pie_key(2) -- type:", type(masks), "masks:", repr(masks))
             if key.key_format_type != format_type:
@@ -165,7 +171,7 @@ class ObjectFactory:
         format_type = key.key_format_type
 
         masknum = enums.get_bit_mask_from_enumerations(masks)
-        print("_build_core_key type:", type(masknum), "masknum:", masknum)
+        print("_build_core_key type (cryptographic_usage_masks):", type(masknum), "masknum:", masknum)
 
         key_material = cobjects.KeyMaterial(value)
         key_value = cobjects.KeyValue(key_material)
@@ -178,7 +184,7 @@ class ObjectFactory:
             key_format_type=misc.KeyFormatType(format_type),
             key_compression_type=None,
             key_value=key_value,
-            key_masks=attributes.CryptographicUsageMask(masknum),
+            cryptographic_usage_masks=attributes.CryptographicUsageMask(masknum),
 #            key_names=attributes.Name(attributes.Name.NameValue, enums.NameType.UNINTERPRETED_TEXT_STRING),
             cryptographic_algorithm=attributes.CryptographicAlgorithm(
                 algorithm),
