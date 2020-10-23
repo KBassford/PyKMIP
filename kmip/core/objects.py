@@ -2161,6 +2161,7 @@ class KeyBlock(Struct):
                  key_value=None,
                  cryptographic_algorithm=None,
                  cryptographic_length=None,
+                 key_masks=None,
                  key_wrapping_data=None):
         super(KeyBlock, self).__init__(Tags.KEY_BLOCK)
         self.key_format_type = key_format_type
@@ -2168,6 +2169,7 @@ class KeyBlock(Struct):
         self.key_value = key_value
         self.cryptographic_algorithm = cryptographic_algorithm
         self.cryptographic_length = cryptographic_length
+        self.key_masks = key_masks
         self.key_wrapping_data = key_wrapping_data
         self.validate()
 
@@ -2195,6 +2197,11 @@ class KeyBlock(Struct):
         if self.is_tag_next(Tags.CRYPTOGRAPHIC_LENGTH, tstream):
             self.cryptographic_length = attributes.CryptographicLength()
             self.cryptographic_length.read(tstream, kmip_version=kmip_version)
+
+        if self.is_tag_next(Tags.CRYPTOGRAPHIC_USAGE_MASK, tstream):
+            self.key_masks = attributes.CryptographicUsageMask()
+            self.key_masks.read(tstream, kmip_version=kmip_version)
+            print("KeyBlock.read -- type:", type(self.key_masks), "key_masks:", self.key_masks)
 
         if self.is_tag_next(Tags.KEY_WRAPPING_DATA, tstream):
             self.key_wrapping_data = KeyWrappingData()
@@ -2226,6 +2233,12 @@ class KeyBlock(Struct):
                 tstream,
                 kmip_version=kmip_version
             )
+        if self.key_masks is not None:
+            print("KeyBlock.write -- type:", type(self.key_masks), "key_masks:", self.key_masks)
+#            self.key_masks.write(
+#                tstream,
+#                kmip_version=kmip_version
+#            )
         if self.key_wrapping_data is not None:
             self.key_wrapping_data.write(
                 tstream,

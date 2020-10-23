@@ -88,18 +88,27 @@ class ObjectFactory:
         algorithm = key.key_block.cryptographic_algorithm.value
         length = key.key_block.cryptographic_length.value
         value = key.key_block.key_value.key_material.value
+        masks = key.key_block.key_masks
         format_type = key.key_block.key_format_type.value
         key_wrapping_data = key.key_block.key_wrapping_data
+        print("key:", repr(key))
+        print("key.key_block:", repr(key.key_block), str(key.key_block))
+        print("key.key_block.key_value:", repr(key.key_block.key_value))
+        print("key.key_block.key_value.key_material.value:", key.key_block.key_value.key_material.value)
+        print("_build_pie_key(1) -- type:", type(masks), "masks:", repr(masks))
 
         if cls is pobjects.SymmetricKey:
             key = cls(
                 algorithm,
                 length,
                 value,
+                masks,
                 key_wrapping_data=self._build_key_wrapping_data(
                     key_wrapping_data
                 )
             )
+            print("cls:", repr(cls), str(cls))
+            print("_build_pie_key(2) -- type:", type(masks), "masks:", repr(masks))
             if key.key_format_type != format_type:
                 raise TypeError(
                     "core key format type not compatible with Pie "
@@ -112,6 +121,7 @@ class ObjectFactory:
                 algorithm,
                 length,
                 value,
+                masks,
                 format_type,
                 key_wrapping_data=self._build_key_wrapping_data(
                     key_wrapping_data
@@ -150,7 +160,12 @@ class ObjectFactory:
         algorithm = key.cryptographic_algorithm
         length = key.cryptographic_length
         value = key.value
+        masks = key.cryptographic_usage_masks
+#        name = key.name
         format_type = key.key_format_type
+
+        masknum = enums.get_bit_mask_from_enumerations(masks)
+        print("_build_core_key type:", type(masknum), "masknum:", masknum)
 
         key_material = cobjects.KeyMaterial(value)
         key_value = cobjects.KeyValue(key_material)
@@ -163,6 +178,8 @@ class ObjectFactory:
             key_format_type=misc.KeyFormatType(format_type),
             key_compression_type=None,
             key_value=key_value,
+            key_masks=attributes.CryptographicUsageMask(masknum),
+#            key_names=attributes.Name(attributes.Name.NameValue, enums.NameType.UNINTERPRETED_TEXT_STRING),
             cryptographic_algorithm=attributes.CryptographicAlgorithm(
                 algorithm),
             cryptographic_length=attributes.CryptographicLength(length),
